@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>هروب الكيمياء المطوّر - أ/ عبد الرحمن عبد الله</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #070a12;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      touch-action: none;
+      color: #f1f5f9;
+    }
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    canvas {
+      display: block;
+      box-shadow: 0 0 25px rgba(0,0,0,0.7);
+      touch-action: none;
+    }
+    .hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      font-size: 13px;
+      font-weight: bold;
+      z-index: 5;
+      gap: 6px;
+    }
+    .hud-pill {
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 20px;
+      padding: 6px 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      pointer-events: auto;
+    }
+    .pause-btn {
+      cursor: pointer;
+      font-size: 14px;
+      background: #0f172a;
+      border: 1px solid #38bdf8;
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #38bdf8;
+      pointer-events: auto;
+    }
+    .pause-btn:active {
+      transform: scale(0.92);
+    }
+    .streak-badge {
+      background: #d97706;
+      color: #fff;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    .hearts {
+      color: #f43f5e;
+      font-size: 15px;
+      letter-spacing: 2px;
+    }
+    .footer-info {
+      position: absolute;
+      bottom: 80px;
+      left: 5%;
+      right: 5%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      pointer-events: none;
+      z-index: 4;
+      text-align: center;
+    }
+    .designer-tag {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 14px;
+      border-radius: 18px;
+      font-size: 11px;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+    .designer-tag strong {
+      color: #38bdf8;
+    }
+    .hadith-tag {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(217, 119, 6, 0.35);
+      padding: 4px 14px;
+      border-radius: 18px;
+      font-size: 11px;
+      color: #fef08a;
+      max-width: 95%;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+      animation: fadeIn 0.4s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .question-banner {
+      position: absolute;
+      top: 55px;
+      left: 4%;
+      right: 4%;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1.5px solid #38bdf8;
+      border-radius: 12px;
+      padding: 10px 14px;
+      text-align: center;
+      font-size: 14.5px;
+      font-weight: 600;
+      color: #ffffff;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      pointer-events: none;
+      z-index: 5;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.45;
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+    .question-banner.error-state {
+      border-color: #f43f5e;
+      background: rgba(36, 15, 23, 0.96);
+    }
+    .question-banner.success-state {
+      border-color: #10b981;
+      background: rgba(8, 38, 25, 0.96);
+    }
+    .mobile-controls {
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 35px;
+      z-index: 6;
+      direction: ltr;
+    }
+    .ctrl-btn {
+      background: rgba(15, 23, 42, 0.92);
+      border: 1.5px solid #38bdf8;
+      border-radius: 50%;
+      width: 58px;
+      height: 58px;
+      color: #38bdf8;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+    }
+    .ctrl-btn:active {
+      background: #0284c7;
+      color: #ffffff;
+      transform: scale(0.92);
+    }
+    .modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(7, 10, 18, 0.96);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+      z-index: 20;
+    }
+    .modal h1 {
+      color: #38bdf8;
+      margin-bottom: 8px;
+      font-size: 21px;
+    }
+    .modal p {
+      max-width: 440px;
+      font-size: 13.5px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+      color: #cbd5e1;
+    }
+    .option-group {
+      margin: 6px 0;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn-select {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: bold;
+    }
+    .btn-select.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
+    }
+    .primary-btn {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border: none;
+      padding: 10px 24px;
+      font-size: 14.5px;
+      font-weight: bold;
+      color: #ffffff;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+      margin: 4px;
+    }
+    .cert-btn {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      border: none;
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffffff;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+      margin: 4px;
+    }
+    .share-btn {
+      background: #059669;
+      border: none;
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+      border-radius: 25px;
+      cursor: pointer;
+      margin: 4px;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+    }
+    .danger-btn {
+      background: #e11d48;
+      border: none;
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+      border-radius: 25px;
+      cursor: pointer;
+      margin: 4px;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .share-options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      max-width: 320px;
+      margin: 15px 0;
+    }
+    .share-channel-btn {
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      font-weight: bold;
+      font-size: 13.5px;
+      cursor: pointer;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-wa { background: #16a34a; }
+    .btn-fb { background: #1877F2; }
+    .btn-tg { background: #0284c7; }
+    .btn-copy { background: #475569; }
+    .best-score-badge {
+      color: #fbbf24;
+      font-weight: bold;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .name-input {
+      background: #0f172a;
+      border: 1.5px solid #38bdf8;
+      color: #fff;
+      padding: 9px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      text-align: center;
+      margin: 10px 0;
+      width: 240px;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <div class="hud">
+    <div class="hud-pill" id="score-box">النقاط: 0</div>
+    <div class="hud-pill"><span class="hearts" id="hearts-box">❤️❤️❤️</span></div>
+    <div class="hud-pill" id="level-box">المستوى 1: الغازات</div>
+    <button class="pause-btn" id="pause-btn" onclick="togglePause()">⏸</button>
+  </div>
+
+  <div id="question-banner" class="question-banner">
+    المس الحارة الصحيحة مباشرة أو استخدم الأسهم للتوجيه!
+  </div>
+
+  <div class="footer-info">
+    <div class="designer-tag">
+      إعداد: <strong>أ/ عبد الرحمن عبد الله</strong> - 01021779644
+    </div>
+    <div class="hadith-tag" id="hadith-box">
+      قال رسول الله ﷺ: «من سلك طريقاً يلتمس فيه علماً سهّل الله له به طريقاً إلى الجنة»
+    </div>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div class="mobile-controls">
+    <div class="ctrl-btn" id="left-btn">⬅</div>
+    <div class="ctrl-btn" id="right-btn">➡</div>
+  </div>
+
+  <!-- الشاشة الافتتاحية -->
+  <div id="start-modal" class="modal">
+    <h1>مغامرة الهروب الكيميائي 🧪</h1>
+    <p>اهرب باختيار المسار الصحيح لكواشف ورواسب الباب الثاني! المس الحارة مباشرة لتغيير المسار.</p>
+    <div id="high-score-display" class="best-score-badge"></div>
+    
+    <div style="font-weight: bold; font-size: 13px; color: #94a3b8;">اختر مظهر اللعبة المريح:</div>
+    <div class="option-group">
+      <button class="btn-select active" onclick="setTheme('dark', this)">ليلي مريح (Dark)</button>
+      <button class="btn-select" onclick="setTheme('light', this)">معملي هادئ</button>
+      <button class="btn-select" onclick="setTheme('arcade', this)">ألوان دافئة</button>
+    </div>
+
+    <div style="font-weight: bold; font-size: 13px; color: #94a3b8;">اختر سرعة المسار:</div>
+    <div class="option-group">
+      <button class="btn-select active" onclick="setSpeed(0.85, this)">هادئة جداً (مهلة وافرة للقراءة)</button>
+      <button class="btn-select" onclick="setSpeed(1.4, this)">متوسطة مريحة</button>
+      <button class="btn-select" onclick="setSpeed(2.2, this)">سريعة للتحدي</button>
+    </div>
+
+    <div style="margin-top: 10px;">
+      <button class="primary-btn" onclick="startGame(1)">المستوى 1 (الغازات)</button>
+      <button class="primary-btn" style="background: linear-gradient(135deg, #7c3aed, #4f46e5);" onclick="startGame(99)">وضع التحدي اللانهائي 🔥</button>
+    </div>
+  </div>
+
+  <!-- شاشة إيقاف مؤقت -->
+  <div id="pause-modal" class="modal" style="display: none;">
+    <h1 style="color: #fbbf24;">اللعبة متوقفة مؤقتاً ⏸</h1>
+    <p>استحضر معادلة الكشف بدقة قبل الاستمرار!</p>
+    <div class="btn-row">
+      <button class="primary-btn" onclick="togglePause()">استئناف اللعب ▶</button>
+      <button class="danger-btn" onclick="quitGame()">الخروج للقائمة ✖</button>
+    </div>
+  </div>
+
+  <!-- شاشة إتمام المستوى -->
+  <div id="level-cleared-modal" class="modal" style="display: none;">
+    <h1 style="color: #34d399;">تهانينا! أتممت المستوى بنجاح 🎉</h1>
+    <p id="level-cleared-text"></p>
+    <div class="btn-row">
+      <button class="primary-btn" id="next-lvl-btn" onclick="goToNextLevel()">المستوى التالي ➡</button>
+      <button class="btn-select" onclick="replayCurrentLevel()">إعادة نفس المستوى 🔄</button>
+      <button class="share-btn" onclick="openShareModal()">مشاركة النتيجة 📤</button>
+      <button class="danger-btn" onclick="quitGame()">القائمة الرئيسية ✖</button>
+    </div>
+  </div>
+
+  <!-- شاشة الخسارة -->
+  <div id="gameover-modal" class="modal" style="display: none;">
+    <h1 style="color: #f43f5e;">نفدت جميع قلوبك! 💔</h1>
+    <p id="fail-details" style="color: #fecdd3;"></p>
+    <p id="gameover-score" style="font-size: 16px; font-weight: bold; color: #38bdf8;"></p>
+    <div class="btn-row">
+      <button class="primary-btn" onclick="resetEntireGame()">لعب من جديد</button>
+      <button class="share-btn" onclick="openShareModal()">مشاركة النتيجة 📤</button>
+    </div>
+  </div>
+
+  <!-- شاشة الفوز التام -->
+  <div id="victory-modal" class="modal" style="display: none;">
+    <h1 style="color: #38bdf8;">🏆 عبقري الكيمياء الأول! 🏆</h1>
+    <p>أتممت جميع مستويات الغازات والرواسب والكواشف بنجاح باهر دون خسارة جميع قلوبك!</p>
+    <p id="victory-score" style="font-size: 16px; font-weight: bold; color: #fbbf24;"></p>
+    
+    <input type="text" id="student-name-input" class="name-input" placeholder="اكتب اسمك الثلاثي للشهادة">
+    
+    <div class="btn-row">
+      <button class="cert-btn" onclick="generateCertificate()">📜 تحميل شهادة التقدير (PNG)</button>
+      <button class="primary-btn" onclick="resetEntireGame()">لعب دورة جديدة</button>
+      <button class="share-btn" onclick="openShareModal()">مشاركة إنجازك 📤</button>
+    </div>
+  </div>
+
+  <!-- نافذة المشاركة -->
+  <div id="share-modal" class="modal" style="display: none; z-index: 30;">
+    <h1>مشاركة نتيجتك</h1>
+    <p>اختر المنصة التي تود نشر نتيجتك عليها:</p>
+    <div class="share-options-grid">
+      <button class="share-channel-btn btn-wa" onclick="shareToWhatsApp()">واتساب</button>
+      <button class="share-channel-btn btn-fb" onclick="shareToFacebook()">فيسبوك</button>
+      <button class="share-channel-btn btn-tg" onclick="shareToTelegram()">تيليجرام</button>
+      <button class="share-channel-btn btn-copy" onclick="copyShareText()">نسخ الرسالة</button>
+    </div>
+    <button class="btn-select" style="margin-top: 10px;" onclick="closeShareModal()">إغلاق النافذة</button>
+  </div>
+</div>
+
+<script>
+const hadithList = [
+  "قال رسول الله ﷺ: «من قال سبحان الله العظيم وبحمده غُرست له نخلة في الجنة»",
+  "قال رسول الله ﷺ: «قل هو الله أحد تعدل ثلث القرآن»",
+  "قال رسول الله ﷺ: «كلمتان خفيفتان على اللسان ثقيلتان في الميزان: سبحان الله وبحمده، سبحان الله العظيم»",
+  "قال رسول الله ﷺ: «أحب الكلام إلى الله أربع: سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر»",
+  "قال رسول الله ﷺ: «من سلك طريقاً يلتمس فيه علماً سهّل الله له به طريقاً إلى الجنة»",
+  "قال رسول الله ﷺ: «لا حول ولا قوة إلا بالله كنز من كنوز الجنة»",
+  "قال رسول الله ﷺ: «من صلى عليّ صلاة صلى الله عليه بها عشراً»",
+  "قال رسول الله ﷺ: «الطهور شطر الإيمان، والحمد لله تملأ الميزان»"
+];
+
+function updateRandomHadith() {
+  const randomIndex = Math.floor(Math.random() * hadithList.length);
+  document.getElementById("hadith-box").innerText = hadithList[randomIndex];
+}
+
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new AudioContext();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playTone(freq, type, duration, endFreq = null) {
+  try {
+    ensureAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + duration);
+    gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch(e) {}
+}
+const soundCorrect = () => playTone(540, 'sine', 0.22, 880);
+const soundWrong = () => playTone(180, 'sawtooth', 0.35, 70);
+const soundWin = () => playTone(440, 'triangle', 0.45, 1200);
+
+const poolGases = [
+  { q: "غاز يسود ورقة مبللة بمحلول أسيتات الرصاص II وله رائحة كريهة؟", c: "H₂S", w: ["SO₂", "CO₂"], h: "كبريتيد الهيدروجين يكوّن PbS أسود.", color: "#1e293b" },
+  { q: "غاز نفاذ الرائحة يخضر ورقة مبللة بثاني كرومات البوتاسيوم المحمضة؟", c: "SO₂", w: ["CO₂", "NO₂"], h: "ثاني أكسيد الكبريت يكوّن كبريتات الكروم III الخضراء.", color: "#10b981" },
+  { q: "غاز يكوّن سحباً بيضاء كثيفة مع ساق مبللة بمحلول النشادر NH₃؟", c: "HCl", w: ["HBr", "HI"], h: "كلوريد الهيدروجين يكون سحب كلوريد الأمونيوم البيضاء.", color: "#f8fafc" },
+  { q: "أبخرة برتقالية حمراء تصفر ورقة مبللة بمحلول النشا؟", c: "أبخرة Br₂", w: ["أبخرة I₂", "أكسيد النيتريك"], h: "تنتج من أكسدة HBr بحمض الكبريتيك المركز.", color: "#f97316" },
+  { q: "أبخرة بنفسجية تزرق ورقة مبللة بمحلول النشا؟", c: "أبخرة I₂", w: ["أبخرة Br₂", "أبخرة النيترات"], h: "تنتج من أكسدة HI بحمض الكبريتيك المركز.", color: "#8b5cf6" },
+  { q: "غاز عديم اللون يتأكسد عند فوهة الأنبوبة إلى أبخرة بنية حمراء؟", c: "أكسيد النيتريك (NO)", w: ["ثاني أكسيد الكبريت", "غاز الأمونيا"], h: "يتأكسد NO إلى NO₂ البني المحمر عند فوهة الأنبوبة.", color: "#b45309" },
+  { q: "غاز يعكر ماء الجير الرائق لفترة قصيرة فقط وتزول العكارة بالإمرار طويلاً؟", c: "CO₂", w: ["SO₂", "H₂S"], h: "ثاني أكسيد الكربون يكوّن كربونات كالسيوم غير ذائبة.", color: "#e2e8f0" },
+  { q: "أنيون يتصاعد عند كشفه بحمض HCl غاز SO₂ مع راسب أصفر معلق؟", c: "الثيوكبريتات (S₂O₃²⁻)", w: ["الكبريتيت", "الكبريتيد"], h: "يتكون غاز SO₂ وراسب أصفر معلق من الكبريت S.", color: "#eab308" },
+  { q: "أبخرة بنية حمراء تزداد كثافتها عند إضافة خراطة نحاس في حمض الكبريتيك؟", c: "NO₂", w: ["Br₂", "SO₂"], h: "يتصاعد غاز ثاني أكسيد النيتروجين NO₂.", color: "#9a3412" },
+  { q: "غاز ليس له لون ولا رائحة ولا يتأكسد ويحدث فوراناً مع حمض HCl؟", c: "CO₂", w: ["NO", "H₂S"], h: "غاز ثاني أكسيد الكربون من أملاح الكربونات والبيكربونات.", color: "#cbd5e1" }
+];
+
+const poolPrecipitates = [
+  { q: "راسب أبيض جيلاتيني يذوب في الأحماض المخففة و في الزيادة من NaOH؟", c: "Al(OH)₃", w: ["Fe(OH)₂", "Fe(OH)₃"], h: "هيدروكسيد الألومنيوم يكوّن ميتا ألومينات الصوديوم الذائبة.", color: "#f1f5f9" },
+  { q: "راسب أصفر مع نترات الفضة (AgNO₃) لا يذوب في محلول النشادر؟", c: "AgI", w: ["AgCl", "Ag₃PO₄"], h: "يوديد الفضة AgI أصفر لا يذوب بالنشادر إطلاقاً.", color: "#facc15" },
+  { q: "راسب أصفر يذوب في محلول النشادر وحمض النيتريك؟", c: "Ag₃PO₄", w: ["AgI", "AgBr"], h: "فوسفات الفضة Ag₃PO₄ أصفر يذوب في النشادر وحمض النيتريك.", color: "#eab308" },
+  { q: "راسب أبيض مع BaCl₂ لا يذوب في حمض الهيدروكلوريك المخفف HCl؟", c: "BaSO₄", w: ["Ba₃(PO₄)₂", "CaCO₃"], h: "كبريتات الباريوم BaSO₄ لا تذوب في HCl المخفف.", color: "#ffffff" },
+  { q: "راسب أبيض مع BaCl₂ يذوب في حمض الهيدروكلوريك المخفف HCl؟", c: "Ba₃(PO₄)₂", w: ["BaSO₄", "AgCl"], h: "فوسفات الباريوم يذوب في حمض الهيدروكلوريك.", color: "#f8fafc" },
+  { q: "راسب أسود لكاتيون Cu²⁺ يذوب في حمض النيتريك الساخن؟", c: "CuS", w: ["PbS", "Ag₂S"], h: "كبريتيد النحاس CuS راسب أسود يذوب بحمض النيتريك الساخن.", color: "#0f172a" },
+  { q: "راسب أبيض يتحول إلى أبيض مخضر عند التعرض للهواء ويذوب بالأحماض؟", c: "Fe(OH)₂", w: ["Fe(OH)₃", "Al(OH)₃"], h: "هيدروكسيد الحديد II الأبيض المخضر.", color: "#86efac" },
+  { q: "راسب جيلاتيني بني محمر يذوب في الأحماض لكاتيون الحديد III؟", c: "Fe(OH)₃", w: ["Fe(OH)₂", "CuS"], h: "هيدروكسيد الحديد III البني المحمر.", color: "#7c2d12" },
+  { q: "راسب أبيض يصير بنفسجياً عند التعرض للضوء ويذوب سريعاً في محلول النشادر؟", c: "AgCl", w: ["AgBr", "AgI"], h: "كلوريد الفضة AgCl.", color: "#c084fc" },
+  { q: "راسب أبيض مصفر يذوب ببطء في محلول النشادر ويصير داكناً بالضوء؟", c: "AgBr", w: ["AgCl", "AgI"], h: "بروميد الفضة AgBr.", color: "#fde047" },
+  { q: "راسب أبيض يسوّد بالتسخين مع نترات الفضة؟", c: "Ag₂SO₃", w: ["Ag₂S", "PbSO₄"], h: "كبريتيت الفضة Ag₂SO₃ يتحول بالتسخين إلى Ag₂S أسود.", color: "#334155" },
+  { q: "راسب أبيض لكاتيون الكالسيوم يذوب في الأحماض والماء المحتوي على CO₂؟", c: "CaCO₃", w: ["CaSO₄", "BaSO₄"], h: "كربونات الكالسيوم CaCO₃.", color: "#ffffff" }
+];
+
+const poolReagents = [
+  { q: "الكاشف الأساسي للمجموعة التحليلية الثالثة (Al³⁺, Fe²⁺, Fe³⁺) هو محلول؟", c: "NH₄OH", w: ["NaOH", "HCl مخفف"], h: "الكاشف الأساسي هيدروكسيد الأمونيوم والتأكيدي هيدروكسيد الصوديوم.", color: "#38bdf8" },
+  { q: "الكاشف الأساسي للمجموعة التحليلية الثانية (كاتيون Cu²⁺) هو؟", c: "H₂S في وسط حامضي", w: ["HCl مخفف فقط", "كلوريد الباريوم"], h: "غاز كبريتيد الهيدروجين في وسط حامضي من HCl.", color: "#0284c7" },
+  { q: "كاشف تأكيدي يفرق بين الكربونات والبيكربونات برواسب بيضاء؟", c: "MgSO₄", w: ["AgNO₃", "BaCl₂"], h: "كبريتات الماغنسيوم: راسب أبيض على البارد مع الكربونات وبعد التسخين مع البيكربونات.", color: "#f1f5f9" },
+  { q: "كاشف تأكيدي يزول لونه البنفسجي عند تفاعله مع نيتريت الصوديوم؟", c: "برمنجنات البوتاسيوم", w: ["ثاني كرومات البوتاسيوم", "محلول اليود"], h: "تفاعل أكسدة واختزال مع برمنجنات البوتاسيوم المحمضة KMnO₄.", color: "#a855f7" },
+  { q: "كاشف تأكيدي يُعطي حلقة بنية (FeSO₄.NO) عند السطح الفاصل؟", c: "اختبار الحلقة البنية", w: ["اختبار اليود", "كشف اللهب"], h: "كبريتات حديد II حديثة التحضير مع حمض كبريتيك مركز.", color: "#78350f" },
+  { q: "كاتيون يكسب لهب بنزن غير المضيء لوناً أحمر طوبياً (كشف جاف)؟", c: "الكالسيوم (Ca²⁺)", w: ["النحاس (Cu²⁺)", "الحديد (Fe³⁺)"], h: "كاتيون الكالسيوم يكسب لهب بنزن لوناً أحمر طوبياً مميزاً.", color: "#dc2626" },
+  { q: "الكاشف الأساسي للمجموعة التحليلية الأولى (Ag⁺, Hg⁺, Pb²⁺) هو؟", c: "حمض HCl المخفف", w: ["حمض H₂SO₄ المركز", "محلول BaCl₂"], h: "تترسب كاتيونات الأولى على هيئة كلوريدات شحيحة الذوبان.", color: "#06b6d4" },
+  { q: "الكاشف الأساسي للمجموعة التحليلية الخامسة (كاتيون Ca²⁺) هو؟", c: "(NH₄)₂CO₃", w: ["NH₄OH", "H₂S"], h: "كربونات الأمونيوم ترسب كاتيون الكالسيوم ككربونات كلسية بيضاء.", color: "#f8fafc" }
+];
+
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function generateLevelQuestions(pool, count = 8) {
+  const selected = shuffle(pool).slice(0, count);
+  return selected.map(item => {
+    const allOptions = shuffle([item.c, ...item.w]);
+    const correctIndex = allOptions.indexOf(item.c);
+    return {
+      q: item.q,
+      options: allOptions,
+      correct: correctIndex,
+      correctText: item.c,
+      hint: item.h,
+      chemColor: item.color || "#38bdf8"
+    };
+  });
+}
+
+// ثيمات مريحة ومعدلة لخفض الوهج وإراحة العين
+let currentTheme = 'dark';
+const themes = {
+  dark: {
+    bg1: "#0a0f1d", bg2: "#0f172a",
+    roadBg: "rgba(0, 0, 0, 0.28)",
+    railStroke: "rgba(56, 189, 248, 0.22)",
+    tieColor: "rgba(255, 255, 255, 0.04)",
+    gateGrad1: "rgba(23, 32, 51, 0.96)", gateGrad2: "rgba(15, 23, 42, 0.96)",
+    gateBorder: "#0284c7", gateText: "#f8fafc",
+    playerShirt: "#0284c7", playerCap: "#f43f5e"
+  },
+  light: {
+    bg1: "#e2e8f0", bg2: "#f8fafc",
+    roadBg: "rgba(0, 0, 0, 0.05)",
+    railStroke: "rgba(100, 116, 139, 0.25)",
+    tieColor: "rgba(0, 0, 0, 0.04)",
+    gateGrad1: "rgba(255, 255, 255, 0.98)", gateGrad2: "rgba(241, 245, 249, 0.98)",
+    gateBorder: "#64748b", gateText: "#0f172a",
+    playerShirt: "#2563eb", playerCap: "#ef4444"
+  },
+  arcade: {
+    bg1: "#1f102e", bg2: "#140720",
+    roadBg: "rgba(0, 0, 0, 0.25)",
+    railStroke: "rgba(192, 132, 252, 0.22)",
+    tieColor: "rgba(254, 240, 138, 0.05)",
+    gateGrad1: "rgba(49, 22, 77, 0.96)", gateGrad2: "rgba(35, 12, 57, 0.96)",
+    gateBorder: "#a855f7", gateText: "#fef08a",
+    playerShirt: "#10b981", playerCap: "#fbbf24"
+  }
+};
+
+function setTheme(th, btn) {
+  currentTheme = th;
+  btn.parentElement.querySelectorAll('.btn-select').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// السرعة الافتراضية هادئة جداً للقراءة والتركيز
+let selectedSpeed = 0.85;
+let baseSpeed = 0.85;
+function setSpeed(sp, btn) {
+  selectedSpeed = sp;
+  btn.parentElement.querySelectorAll('.btn-select').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let W, H;
+function resize() {
+  W = Math.min(window.innerWidth, 480);
+  H = window.innerHeight;
+  canvas.width = W;
+  canvas.height = H;
+}
+window.addEventListener("resize", resize);
+resize();
+
+let globalLives = 3;
+let totalScore = 0;
+let streak = 0;
+let currentLevel = 1;
+let levelQuestions = [];
+let currentQIndex = 0;
+let isRunning = false;
+let isGamePaused = false;
+let isPausedForReview = false;
+let targetLane = 1;
+let currentLanePos = 1; 
+let gateProgress = 0;
+let questionEvaluated = false;
+let particles = [];
+let lastTimestamp = 0;
+let screenShake = 0;
+let activeHighlightColor = null;
+
+function updateHighScoreUI() {
+  const hs = localStorage.getItem('chem_runner_best') || 0;
+  const hsEl = document.getElementById("high-score-display");
+  if (hsEl) hsEl.innerText = hs > 0 ? `🏆 أعلى نتيجة مسجلة: ${hs} نقطة` : '';
+}
+updateHighScoreUI();
+
+function saveHighScore() {
+  const currentBest = parseInt(localStorage.getItem('chem_runner_best') || 0);
+  if (totalScore > currentBest) {
+    localStorage.setItem('chem_runner_best', totalScore);
+    updateHighScoreUI();
+  }
+}
+
+function updateHUD() {
+  let heartsStr = "";
+  for (let i = 0; i < globalLives; i++) heartsStr += "❤️";
+  document.getElementById("hearts-box").innerText = heartsStr || "💔";
+
+  let streakBadge = streak >= 2 ? ` <span class="streak-badge">x${Math.min(streak, 4)}🔥</span>` : '';
+  document.getElementById("score-box").innerHTML = `النقاط: ${totalScore}${streakBadge}`;
+}
+
+function triggerShake(magnitude = 10) {
+  screenShake = magnitude;
+}
+
+function togglePause() {
+  if (!isRunning && !isGamePaused) return;
+  isGamePaused = !isGamePaused;
+  const pauseModal = document.getElementById("pause-modal");
+  const pauseBtn = document.getElementById("pause-btn");
+  if (isGamePaused) {
+    pauseModal.style.display = "flex";
+    pauseBtn.innerText = "▶";
+  } else {
+    pauseModal.style.display = "none";
+    pauseBtn.innerText = "⏸";
+    lastTimestamp = performance.now();
+  }
+}
+
+function spawnParticles(x, y, color = "#38bdf8") {
+  for (let i = 0; i < 20; i++) {
+    particles.push({
+      x: x,
+      y: y,
+      vx: (Math.random() - 0.5) * 6,
+      vy: (Math.random() - 0.6) * 6,
+      radius: Math.random() * 3 + 1.5,
+      color: color,
+      alpha: 1
+    });
+  }
+}
+
+function drawSubSupText(ctx, text, x, y, baseSize = 13.5) {
+  ctx.save();
+  ctx.font = `bold ${baseSize}px 'Segoe UI', Tahoma, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+function loadQuestion() {
+  if (currentQIndex >= levelQuestions.length) {
+    if (currentLevel === 99) {
+      baseSpeed = Math.min(baseSpeed + 0.15, 2.2);
+      const combinedPool = [...poolGases, ...poolPrecipitates, ...poolReagents];
+      levelQuestions = generateLevelQuestions(combinedPool, 8);
+      currentQIndex = 0;
+    } else {
+      levelCleared();
+      return;
+    }
+  }
+  const qObj = levelQuestions[currentQIndex];
+  const banner = document.getElementById("question-banner");
+  banner.className = "question-banner";
+  banner.innerText = qObj.q;
+  gateProgress = 0;
+  questionEvaluated = false;
+  activeHighlightColor = null;
+}
+
+const HORIZON_Y_RATIO = 0.16;
+const PLAYER_Y_RATIO = 0.82;
+
+function getPerspectiveMetrics(t) {
+  const horizonY = H * HORIZON_Y_RATIO;
+  const bottomY = H * PLAYER_Y_RATIO;
+  const y = horizonY + Math.pow(t, 1.45) * (bottomY - horizonY);
+
+  const topWidth = W * 0.38;
+  const bottomWidth = W * 0.94;
+  const currentTotalW = topWidth + t * (bottomWidth - topWidth);
+  const leftX = (W - currentTotalW) / 2;
+  const laneW = currentTotalW / 3;
+
+  return { y, leftX, laneW, scale: 0.45 + (t * 0.55) };
+}
+
+function update(dtFactor) {
+  if (!isRunning || isPausedForReview || isGamePaused) return;
+
+  if (screenShake > 0) {
+    screenShake = Math.max(0, screenShake - 0.7 * dtFactor);
+  }
+
+  // حركة هادئة وتتيح قراءة السؤال في الأفق
+  let speedStep = (baseSpeed * 0.0022);
+  if (gateProgress < 0.35) {
+    speedStep *= 0.5;
+  }
+  gateProgress += speedStep * dtFactor;
+
+  const lerpRatio = 1 - Math.pow(0.72, dtFactor);
+  currentLanePos += (targetLane - currentLanePos) * lerpRatio;
+
+  const qObj = levelQuestions[currentQIndex];
+
+  if (!questionEvaluated && qObj && gateProgress >= 0.90 && gateProgress <= 1.02) {
+    const roundedLane = Math.round(currentLanePos);
+    const isCloseEnough = Math.abs(currentLanePos - targetLane) < 0.45;
+    const finalLane = isCloseEnough ? targetLane : roundedLane;
+
+    questionEvaluated = true;
+    if (finalLane === qObj.correct) {
+      soundCorrect();
+      streak++;
+      const multiplier = Math.min(streak, 4);
+      totalScore += (100 * multiplier);
+      saveHighScore();
+      updateHUD();
+      
+      activeHighlightColor = qObj.chemColor;
+      const { y, leftX, laneW } = getPerspectiveMetrics(1.0);
+      spawnParticles(leftX + (finalLane * laneW) + laneW / 2, y, qObj.chemColor);
+
+      const banner = document.getElementById("question-banner");
+      banner.classList.add("success-state");
+      banner.innerHTML = `إجابة صحيحة ممتازة! ✅ <strong>${qObj.correctText}</strong>`;
+
+      isPausedForReview = true;
+      setTimeout(() => {
+        isPausedForReview = false;
+        currentQIndex++;
+        loadQuestion();
+      }, 1000);
+    } else {
+      soundWrong();
+      triggerShake(12);
+      streak = 0;
+      updateHUD();
+      handleMistake(qObj, false);
+    }
+  }
+
+  if (!questionEvaluated && gateProgress > 1.1) {
+    questionEvaluated = true;
+    soundWrong();
+    triggerShake(10);
+    streak = 0;
+    updateHUD();
+    handleMistake(qObj, true);
+  }
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx * dtFactor;
+    p.y += p.vy * dtFactor;
+    p.alpha -= 0.025 * dtFactor;
+    if (p.alpha <= 0) particles.splice(i, 1);
+  }
+}
+
+function handleMistake(qObj, missed) {
+  globalLives--;
+  updateHUD();
+
+  const banner = document.getElementById("question-banner");
+  banner.className = "question-banner error-state";
+  const prefix = missed ? "تجاوزت الحاجز!" : "إجابة خاطئة!";
+  const explanation = `${prefix} الصح: <strong style="color: #34d399;">${qObj.correctText}</strong> | ${qObj.hint}`;
+
+  if (globalLives <= 0) {
+    gameOver(explanation);
+  } else {
+    isPausedForReview = true;
+    banner.innerHTML = explanation;
+    setTimeout(() => {
+      isPausedForReview = false;
+      currentQIndex++;
+      loadQuestion();
+    }, 2800);
+  }
+}
+
+let legAnim = 0;
+function drawPlayer(x, y, scale, theme) {
+  if (!isPausedForReview && !isGamePaused) {
+    legAnim += 0.18;
+  }
+  const legOffset = Math.sin(legAnim) * 6;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  // ظل مريح وخفيف
+  ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+  ctx.beginPath();
+  ctx.ellipse(0, 48, 22, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (!isPausedForReview && !isGamePaused) {
+    ctx.fillStyle = activeHighlightColor || theme.gateBorder;
+    ctx.globalAlpha = 0.35;
+    ctx.beginPath();
+    ctx.arc(-8 + Math.random()*16, 46, 2.5 + Math.random()*2, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+  }
+
+  // الأرجل
+  ctx.strokeStyle = "#1e293b";
+  ctx.lineWidth = 6;
+  ctx.lineCap = "round";
+  
+  ctx.beginPath();
+  ctx.moveTo(-6, 20); ctx.lineTo(-8, 36 + legOffset);
+  ctx.stroke();
+  ctx.fillStyle = "#ef4444";
+  ctx.fillRect(-11, 36 + legOffset, 10, 6);
+
+  ctx.beginPath();
+  ctx.moveTo(6, 20); ctx.lineTo(8, 36 - legOffset);
+  ctx.stroke();
+  ctx.fillStyle = "#ef4444";
+  ctx.fillRect(5, 36 - legOffset, 10, 6);
+
+  // الجسم
+  ctx.fillStyle = theme.playerShirt;
+  ctx.beginPath();
+  ctx.roundRect(-16, -10, 32, 34, 8);
+  ctx.fill();
+
+  ctx.strokeStyle = "#fbbf24";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(-9, -10); ctx.lineTo(-9, 24);
+  ctx.moveTo(9, -10); ctx.lineTo(9, 24);
+  ctx.stroke();
+
+  // الرأس
+  ctx.fillStyle = "#fed7aa";
+  ctx.beginPath();
+  ctx.arc(0, -22, 13, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#0f172a";
+  ctx.fillRect(-6, -24, 4, 3);
+  ctx.fillRect(2, -24, 4, 3);
+
+  // القبعة
+  ctx.fillStyle = theme.playerCap;
+  ctx.beginPath();
+  ctx.arc(0, -26, 14, Math.PI, 0, false);
+  ctx.fill();
+  ctx.fillRect(4, -30, 13, 4);
+
+  // أنبوبة الاختبار
+  ctx.fillStyle = activeHighlightColor || "#22c55e";
+  ctx.fillRect(17, 4, 8, 14);
+  ctx.fillStyle = "#cbd5e1";
+  ctx.fillRect(19, 1, 4, 3);
+
+  ctx.restore();
+}
+
+function draw() {
+  ctx.save();
+
+  if (screenShake > 0) {
+    const shakeX = (Math.random() - 0.5) * screenShake;
+    const shakeY = (Math.random() - 0.5) * screenShake;
+    ctx.translate(shakeX, shakeY);
+  }
+
+  const th = themes[currentTheme];
+
+  // خلفية متدرجة هادئة
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, th.bg1);
+  bgGrad.addColorStop(1, th.bg2);
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  const topM = getPerspectiveMetrics(0.0);
+  const botM = getPerspectiveMetrics(1.15);
+
+  // 1. أرضية المسار مريحة للعين وتمنع الشد البصري
+  ctx.fillStyle = th.roadBg;
+  ctx.beginPath();
+  ctx.moveTo(topM.leftX, topM.y);
+  ctx.lineTo(topM.leftX + topM.laneW * 3, topM.y);
+  ctx.lineTo(botM.leftX + botM.laneW * 3, botM.y);
+  ctx.lineTo(botM.leftX, botM.y);
+  ctx.closePath();
+  ctx.fill();
+
+  // 2. عوارض ناعمة جداً ومتباعدة تمنع الوميض المزعج (7 فقط وبحركة بطيئة)
+  const tieCount = 7;
+  const timeOffset = isPausedForReview || isGamePaused ? 0 : (Date.now() / 140) % 1;
+  ctx.strokeStyle = th.tieColor;
+  ctx.lineWidth = 3;
+  for (let idx = 0; idx < tieCount; idx++) {
+    const tVal = ((idx + timeOffset) / tieCount);
+    if (tVal > 1.05 || tVal < 0.12) continue;
+    const m = getPerspectiveMetrics(tVal);
+    ctx.beginPath();
+    ctx.moveTo(m.leftX, m.y);
+    ctx.lineTo(m.leftX + m.laneW * 3, m.y);
+    ctx.stroke();
+  }
+
+  // 3. قضبان مسار هادئة ورفيعة
+  ctx.strokeStyle = activeHighlightColor ? `${activeHighlightColor}55` : th.railStroke;
+  ctx.lineWidth = 2;
+  for (let i = 0; i <= 3; i++) {
+    const xTop = topM.leftX + (i * topM.laneW);
+    const xBot = botM.leftX + (i * botM.laneW);
+    ctx.beginPath();
+    ctx.moveTo(xTop, topM.y);
+    ctx.lineTo(xBot, botM.y);
+    ctx.stroke();
+  }
+
+  // 4. البوابات والخيارات
+  const qObj = levelQuestions[currentQIndex];
+  if (qObj && gateProgress >= 0 && gateProgress <= 1.08) {
+    const pM = getPerspectiveMetrics(gateProgress);
+    const bH = 54 * pM.scale;
+
+    for (let i = 0; i < 3; i++) {
+      const bX = pM.leftX + (i * pM.laneW) + (4 * pM.scale);
+      const bW = pM.laneW - (8 * pM.scale);
+
+      const grad = ctx.createLinearGradient(bX, pM.y, bX, pM.y + bH);
+      grad.addColorStop(0, th.gateGrad1);
+      grad.addColorStop(1, th.gateGrad2);
+      ctx.fillStyle = grad;
+
+      if (isPausedForReview && i === qObj.correct) {
+        ctx.strokeStyle = qObj.chemColor || "#10b981";
+        ctx.lineWidth = 3.5 * pM.scale;
+      } else {
+        ctx.strokeStyle = th.gateBorder;
+        ctx.lineWidth = 2 * pM.scale;
+      }
+
+      ctx.beginPath();
+      ctx.roundRect(bX, pM.y - bH, bW, bH, 8 * pM.scale);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = th.gateText;
+      const fontSize = Math.max(8.5, 13.5 * pM.scale);
+      drawSubSupText(ctx, qObj.options[i], bX + bW / 2, pM.y - bH / 2, fontSize);
+    }
+  }
+
+  // 5. الجسيمات
+  particles.forEach(p => {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.alpha);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // 6. اللاعب
+  const playerM = getPerspectiveMetrics(1.0);
+  const pX = playerM.leftX + (currentLanePos * playerM.laneW) + (playerM.laneW / 2);
+  const pY = playerM.y;
+  drawPlayer(pX, pY, playerM.scale, th);
+
+  ctx.restore();
+}
+
+function loop(timestamp) {
+  if (!lastTimestamp) lastTimestamp = timestamp;
+  const elapsed = timestamp - lastTimestamp;
+  lastTimestamp = timestamp;
+
+  const dtFactor = Math.min(elapsed / (1000 / 60), 3.0);
+
+  update(dtFactor);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function goLeft() {
+  if (isPausedForReview || isGamePaused) return;
+  if (targetLane > 0) targetLane--;
+}
+function goRight() {
+  if (isPausedForReview || isGamePaused) return;
+  if (targetLane < 2) targetLane++;
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "ArrowLeft" || e.code === "KeyA") goLeft();
+  if (e.code === "ArrowRight" || e.code === "KeyD") goRight();
+  if (e.code === "Space" || e.code === "KeyP") togglePause();
+});
+
+const leftBtn = document.getElementById("left-btn");
+const rightBtn = document.getElementById("right-btn");
+
+leftBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); goLeft(); });
+rightBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); goRight(); });
+
+// النقر المباشر على الحارة (يسار / وسط / يمين)
+canvas.addEventListener("pointerdown", (e) => {
+  if (!isRunning || isPausedForReview || isGamePaused) return;
+  const rect = canvas.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const playerM = getPerspectiveMetrics(1.0);
+
+  if (clickX < playerM.leftX + playerM.laneW) {
+    targetLane = 0;
+  } else if (clickX < playerM.leftX + playerM.laneW * 2) {
+    targetLane = 1;
+  } else {
+    targetLane = 2;
+  }
+});
+
+let touchStartX = 0;
+canvas.addEventListener("touchstart", (e) => {
+  touchStartX = e.touches[0].clientX;
+}, { passive: true });
+canvas.addEventListener("touchend", (e) => {
+  const diffX = e.changedTouches[0].clientX - touchStartX;
+  if (diffX > 40) goRight();
+  else if (diffX < -40) goLeft();
+}, { passive: true });
+
+function startGame(lvl) {
+  ensureAudio();
+  updateRandomHadith();
+  document.getElementById("start-modal").style.display = "none";
+  baseSpeed = selectedSpeed;
+  currentLevel = lvl;
+  currentQIndex = 0;
+  targetLane = 1;
+  currentLanePos = 1;
+  isPausedForReview = false;
+  isGamePaused = false;
+  activeHighlightColor = null;
+
+  if (currentLevel === 1) {
+    document.getElementById("level-box").innerText = "المستوى 1: الغازات";
+    levelQuestions = generateLevelQuestions(poolGases, 8);
+  } else if (currentLevel === 2) {
+    document.getElementById("level-box").innerText = "المستوى 2: الرواسب";
+    levelQuestions = generateLevelQuestions(poolPrecipitates, 8);
+  } else if (currentLevel === 3) {
+    document.getElementById("level-box").innerText = "المستوى 3: الكواشف";
+    levelQuestions = generateLevelQuestions(poolReagents, 8);
+  } else if (currentLevel === 99) {
+    document.getElementById("level-box").innerText = "التحدي اللانهائي 🔥";
+    const combined = [...poolGases, ...poolPrecipitates, ...poolReagents];
+    levelQuestions = generateLevelQuestions(combined, 10);
+  }
+
+  updateHUD();
+  isRunning = true;
+  loadQuestion();
+}
+
+function levelCleared() {
+  isRunning = false;
+  soundWin();
+  updateRandomHadith();
+  saveHighScore();
+
+  if (currentLevel < 3) {
+    document.getElementById("level-cleared-text").innerHTML = 
+      `أحسنت صنعاً! اجتزت جميع أسئلة المستوى ${currentLevel} بنجاح.<br>رصيدك الحالي: <strong>${totalScore} نقطة</strong>.<br>القلوب المتبقية: <strong>${globalLives}</strong>`;
+    document.getElementById("next-lvl-btn").style.display = "inline-block";
+    document.getElementById("level-cleared-modal").style.display = "flex";
+  } else {
+    document.getElementById("victory-score").innerText = `مجموع نقاطك النهائي: ${totalScore} نقطة مع الاحتفاظ بـ (${globalLives}) قلوب!`;
+    document.getElementById("victory-modal").style.display = "flex";
+  }
+}
+
+function goToNextLevel() {
+  document.getElementById("level-cleared-modal").style.display = "none";
+  startGame(currentLevel + 1);
+}
+
+function replayCurrentLevel() {
+  document.getElementById("level-cleared-modal").style.display = "none";
+  startGame(currentLevel);
+}
+
+function quitGame() {
+  document.getElementById("pause-modal").style.display = "none";
+  document.getElementById("level-cleared-modal").style.display = "none";
+  document.getElementById("start-modal").style.display = "flex";
+  isRunning = false;
+  isGamePaused = false;
+}
+
+function gameOver(failMsg) {
+  isRunning = false;
+  isPausedForReview = false;
+  updateRandomHadith();
+  saveHighScore();
+  document.getElementById("fail-details").innerHTML = failMsg;
+  document.getElementById("gameover-score").innerText = `مجموع نقاطك الكلي: ${totalScore} نقطة`;
+  document.getElementById("gameover-modal").style.display = "flex";
+}
+
+function resetEntireGame() {
+  document.getElementById("gameover-modal").style.display = "none";
+  document.getElementById("victory-modal").style.display = "none";
+  globalLives = 3;
+  totalScore = 0;
+  streak = 0;
+  updateHUD();
+  startGame(1);
+}
+
+function generateCertificate() {
+  const studentName = document.getElementById("student-name-input").value.trim() || "طالب كيمياء متميز";
+
+  const certCanvas = document.createElement("canvas");
+  certCanvas.width = 900;
+  certCanvas.height = 620;
+  const c = certCanvas.getContext("2d");
+
+  c.fillStyle = "#090d16";
+  c.fillRect(0, 0, 900, 620);
+
+  c.strokeStyle = "#fbbf24";
+  c.lineWidth = 8;
+  c.strokeRect(25, 25, 850, 570);
+
+  c.strokeStyle = "#38bdf8";
+  c.lineWidth = 2;
+  c.strokeRect(35, 35, 830, 550);
+
+  c.textAlign = "center";
+  c.fillStyle = "#38bdf8";
+  c.font = "bold 34px 'Segoe UI', Tahoma";
+  c.fillText("⭐ شهادة تفوق في الكيمياء للثانوية العامة ⭐", 450, 90);
+
+  c.fillStyle = "#ffffff";
+  c.font = "22px 'Segoe UI', Tahoma";
+  c.fillText("تُمنح هذه الشهادة تقديراً لاجتياز مغامرة التحليل الكيفي بنجاح للطالب:", 450, 155);
+
+  c.fillStyle = "#fbbf24";
+  c.font = "bold 36px 'Segoe UI', Tahoma";
+  c.fillText(studentName, 450, 220);
+
+  c.fillStyle = "#e2e8f0";
+  c.font = "20px 'Segoe UI', Tahoma";
+  c.fillText(`حقق مجموع نقاط رائع: (${totalScore} نقطة) في تمييز الغازات والرواسب والكواشف.`, 450, 290);
+
+  c.fillStyle = "#10b981";
+  c.font = "bold 21px 'Segoe UI', Tahoma";
+  c.fillText("مع أطيب التمنيات بدوام التفوق والدرجة النهائية في الكيمياء", 450, 360);
+
+  c.textAlign = "right";
+  c.fillStyle = "#94a3b8";
+  c.font = "17px 'Segoe UI', Tahoma";
+  c.fillText("إشراف وإعداد:", 800, 480);
+  c.fillStyle = "#38bdf8";
+  c.font = "bold 22px 'Segoe UI', Tahoma";
+  c.fillText("أ/ عبد الرحمن عبد الله", 800, 515);
+  c.fillStyle = "#cbd5e1";
+  c.font = "16px 'Segoe UI', Tahoma";
+  c.fillText("هاتف: 01021779644", 800, 545);
+
+  c.textAlign = "left";
+  c.fillStyle = "#94a3b8";
+  c.font = "16px 'Segoe UI', Tahoma";
+  const dateStr = new Date().toLocaleDateString('ar-EG');
+  c.fillText(`تاريخ الإنجاز: ${dateStr}`, 60, 535);
+
+  const link = document.createElement("a");
+  link.download = `شهادة_كيمياء_${studentName}.png`;
+  link.href = certCanvas.toDataURL("image/png");
+  link.click();
+}
+
+function getShareMessage() {
+  return `🎉 حققت رصيد (${totalScore} نقطة) في لعبة هروب التحليل الكيفي المطورة!\n` +
+         `مراجعة وإعداد: أ/ عبد الرحمن عبد الله (01021779644)\n` +
+         `تحداني في كيمياء الثانوية العامة عبر الرابط:\n` +
+         window.location.href;
+}
+
+function openShareModal() {
+  document.getElementById("share-modal").style.display = "flex";
+}
+
+function closeShareModal() {
+  document.getElementById("share-modal").style.display = "none";
+}
+
+function shareToWhatsApp() {
+  const text = encodeURIComponent(getShareMessage());
+  window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+}
+
+function shareToFacebook() {
+  const url = encodeURIComponent(window.location.href);
+  const quote = encodeURIComponent(`حققت ${totalScore} نقطة في لعبة هروب الكيمياء - أ/ عبد الرحمن عبد الله`);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, '_blank');
+}
+
+function shareToTelegram() {
+  const text = encodeURIComponent(getShareMessage());
+  window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${text}`, '_blank');
+}
+
+function copyShareText() {
+  navigator.clipboard.writeText(getShareMessage()).then(() => {
+    alert("تم نسخ رسالة التحدي بنجاح! يمكنك الآن مشاركتها مع زملائك.");
+    closeShareModal();
+  });
+}
+
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
